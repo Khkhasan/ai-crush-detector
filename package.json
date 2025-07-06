@@ -1,11 +1,10 @@
 {
   "name": "ai-crush-detector",
   "version": "1.0.0",
-  "description": "AI Crush Detector Prank Website with Fixed Telegram Integration",
+  "description": "AI Crush Detector with Fixed Telegram Integration",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
     "build": "echo 'Build complete'"
   },
   "dependencies": {
