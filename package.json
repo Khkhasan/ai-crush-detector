@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "express": "^4.19.2",
-    "multer": "^1.4.4"
+    "multer": "^1.4.4",
+    "form-data": "^4.0.0"
   },
   "engines": {
     "node": "18.x"
